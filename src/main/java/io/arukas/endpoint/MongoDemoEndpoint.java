@@ -4,6 +4,7 @@ import com.github.javafaker.Faker;
 import io.arukas.domain.ItemDemo;
 import io.arukas.repository.mongo.ItemDemoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +39,7 @@ public class MongoDemoEndpoint {
         Map<String, Object> details = Map.of(
                 "pid", UUID.randomUUID().toString().replace("-", ""),
                 "username", "mongodb",
-                "version", "4.2",
+                "version", faker.number().randomNumber(),
                 "jdk", System.getProperty("java.version"),
                 "languages", List.of("Java", "Kotlin", "Scala"),
                 ".net", "C#"
@@ -73,5 +74,18 @@ public class MongoDemoEndpoint {
         itemDemo.setDesc(remark);
         itemDemo.setUpdateAt(LocalDateTime.now());
         return itemDemoRepository.save(itemDemo);
+    }
+
+    /**
+     * 注意这里的数据类型 version 不用用错了
+     *
+     * @param version
+     * @return
+     */
+    @GetMapping("mongo/queryItem")
+    public ItemDemo queryItem(Long version) {
+        ItemDemo itemDemo = new ItemDemo();
+        itemDemo.setDetails(Map.of("version", version));
+        return itemDemoRepository.findOne(Example.of(itemDemo)).orElse(new ItemDemo());
     }
 }
